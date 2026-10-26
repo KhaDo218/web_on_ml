@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ôn tập Máy học trong Phân tích Kinh doanh (MLBA)</title>
+<meta name="description" content="Ngân hàng câu hỏi trắc nghiệm ôn tập môn Học máy trong phân tích kinh doanh (UEL): Python, ML, MySQL, PyQt6, ML.NET.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <div class="brand-mark">ML</div>
+      <div>
+        <h1>Học máy trong Phân tích Kinh doanh</h1>
+        <p id="brand-sub">Ngân hàng câu hỏi ôn tập</p>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="practice" role="tab">Luyện tập</button>
+      <button class="tab-btn" data-tab="exam" role="tab">Thi thử</button>
+      <button class="tab-btn" data-tab="review" role="tab">Câu làm sai <span id="wrong-count" class="pill">0</span></button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ===================== LUYỆN TẬP ===================== -->
+  <section id="practice-tab" class="tab-content active">
+    <div class="toolbar card">
+      <div class="filters">
+        <label>Chương
+          <select id="f-chapter"></select>
+        </label>
+        <label>Độ khó
+          <select id="f-diff">
+            <option value="all">Tất cả</option>
+            <option value="1">Dễ</option>
+            <option value="2">Trung bình</option>
+            <option value="3">Khó</option>
+          </select>
+        </label>
+        <label>Nguồn
+          <select id="f-source">
+            <option value="all">Tất cả</option>
+            <option value="bo1">Ngân hàng theo chương</option>
+            <option value="quiz">Quiz trên lớp của thầy</option>
+            <option value="bosung">Bổ sung: code &amp; bài tập thực tế</option>
+          </select>
+        </label>
+        <label>Trạng thái
+          <select id="f-status">
+            <option value="all">Tất cả</option>
+            <option value="todo">Chưa làm</option>
+            <option value="wrong">Đã làm sai</option>
+            <option value="right">Đã làm đúng</option>
+          </select>
+        </label>
+        <label class="grow">Tìm kiếm
+          <input type="search" id="f-search" placeholder="Từ khóa trong câu hỏi hoặc đáp án">
+        </label>
+      </div>
+      <div class="toolbar-row">
+        <div class="stats" id="practice-stats"></div>
+        <div class="actions">
+          <label class="check"><input type="checkbox" id="f-shuffle"> Xáo thứ tự câu</label>
+          <button id="reset-practice-btn" class="btn ghost">Xóa tiến độ</button>
+        </div>
+      </div>
+      <div class="progress"><i id="practice-bar"></i></div>
+    </div>
+
+    <div id="practice-list"></div>
+    <div class="pager" id="practice-pager"></div>
+  </section>
+
+  <!-- ===================== THI THỬ ===================== -->
+  <section id="exam-tab" class="tab-content">
+    <div id="exam-setup" class="card setup">
+      <h2>Thiết lập bài thi</h2>
+      <p class="muted">Câu hỏi được chọn ngẫu nhiên, đáp án được xáo trộn. Kết quả và giải thích chỉ hiện sau khi nộp bài.</p>
+      <div class="setup-grid">
+        <label>Số câu
+          <input type="number" id="exam-count" min="5" value="40">
+        </label>
+        <label>Thời gian (phút)
+          <input type="number" id="exam-minutes" min="1" max="240" value="45">
+        </label>
+        <label>Độ khó
+          <select id="exam-diff">
+            <option value="all">Trộn tất cả</option>
+            <option value="1">Dễ</option>
+            <option value="2">Trung bình</option>
+            <option value="3">Khó</option>
+          </select>
+        </label>
+      </div>
+      <div class="chapter-picks" id="exam-chapters"></div>
+      <div class="setup-actions">
+        <button class="btn ghost" id="exam-all-ch">Chọn tất cả</button>
+        <button class="btn ghost" id="exam-none-ch">Bỏ chọn</button>
+        <button id="start-exam-btn" class="btn primary">Bắt đầu thi</button>
+      </div>
+    </div>
+
+    <div id="exam-running" class="hidden">
+      <div class="exam-bar card">
+        <div class="timer" id="exam-timer">00:00</div>
+        <div class="exam-progress" id="exam-progress"></div>
+        <button id="submit-exam-btn" class="btn primary">Nộp bài</button>
+      </div>
+      <div id="exam-summary" class="hidden"></div>
+      <div id="exam-list"></div>
+      <div class="center">
+        <button id="retry-exam-btn" class="btn ghost hidden">Làm bài thi khác</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CÂU LÀM SAI ===================== -->
+  <section id="review-tab" class="tab-content">
+    <div class="card toolbar-row">
+      <div class="muted">Những câu bạn trả lời sai ở phần Luyện tập hoặc Thi thử được lưu lại ở đây (trên trình duyệt này). Làm đúng lại sẽ tự gỡ khỏi danh sách.</div>
+      <button id="clear-wrong-btn" class="btn ghost">Xóa danh sách</button>
+    </div>
+    <div id="review-list"></div>
+  </section>
+
+</main>
+
+<footer class="app-footer wrap">
+  Tổng hợp từ slide bài giảng môn Học máy trong phân tích kinh doanh (TS. Trần Duy Thanh, Khoa HTTT - UEL).
+</footer>
+
+<script src="data/questions.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

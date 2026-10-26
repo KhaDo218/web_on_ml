@@ -1,0 +1,11 @@
+{
+  "name": "on-tap-web-kinh-doanh",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Web ôn tập trắc nghiệm môn Phát triển Web Kinh doanh (UEL)",
+  "scripts": {
+    "build": "node tools/merge_questions.js",
+    "start": "node tools/server.js",
+    "verify": "node tools/verify_bosung.js"
+  }
+}
