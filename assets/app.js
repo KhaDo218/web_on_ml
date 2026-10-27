@@ -1,13 +1,13 @@
 // ============================================================================
-// Web ôn tập - Phát triển Web Kinh doanh
+// Web ôn tập - Học máy trong Phân tích Kinh doanh (MLBA)
 // Dữ liệu: biến QUESTIONS (data/questions.js). Tiến độ lưu localStorage.
 // ============================================================================
 (function () {
   "use strict";
 
-    const CHAPTER_NAMES = {
+  const CHAPTER_NAMES = {
     1: "01 - Tổng quan về Máy học (MLBA) & Ôn tập Python",
-    2: "02 - (Chương 2 - Nếu có)",
+    2: "02 - Dữ liệu",
     3: "03 - MySQL Interaction",
     4: "04 - Các nhóm giải thuật máy học",
     5: "05 - Thiết kế hệ thống máy học",
@@ -18,26 +18,10 @@
   const SOURCE = { bo1: "Slide bài giảng", quiz: "Quiz trên lớp", bosung: "Câu hỏi bổ sung" };
   const LETTERS = "ABCD";
 
-    // Biến lưu chuỗi đúng/sai liên tiếp
-  let correctStreak = 0;
-  let wrongStreak = 0;
-
-  // Danh sách ảnh GIF/Webp
-  const WRONG_GIFS = [
-    "https://media.tenor.com/9PFhK1Tcie8AAAAm/darts.webp",
-    "https://i.redd.it/1wxi2yjtxb7a1.gif",
-    "https://media.tenor.com/RoMuG5SI7qQAAAAi/pokemon.gif",
-    "https://media.tenor.com/FBh5dO1VGvsAAAAM/pokemon-pokemon-the-johto-journeys.gif",
-    "https://media.tenor.com/OO67XnnDQ6YAAAAM/pokemon-pokemon-memes.gif"
-  ];
-
-  const CORRECT_GIFS = [
-    "https://media.tenor.com/zDnuREBSTXMAAAAM/evil-smile.gif",
-    "https://media.tenor.com/wvoZgGgmJ2EAAAAM/pikachu-clap.gif",
-    "https://media.tenor.com/43LBBFIcdZwAAAAm/pika%C3%A7u.webp",
-    "https://media.tenor.com/Vijka4gG4sUAAAAm/pikachu-meme-delight.webp",
-    "https://media.tenor.com/Wv_1ETNfwU0AAAAM/pokemon-pikachu.gif"
-  ];
+  // Danh sách GIF nằm ở gifs/gif_dung.js và gifs/gif_sai.js (nạp trước app.js trong index.html)
+  const CORRECT_GIFS = Array.isArray(window.CORRECT_GIFS) ? window.CORRECT_GIFS.filter(Boolean) : [];
+  const WRONG_GIFS = Array.isArray(window.WRONG_GIFS) ? window.WRONG_GIFS.filter(Boolean) : [];
+  const lastGif = { right: -1, wrong: -1 }; // tránh lặp lại đúng ảnh vừa hiện
   const PAGE_SIZE = 20;
   const STORE_KEY = "mlba_onthi_v1"; 
 
@@ -165,7 +149,7 @@
       const ok = sameSet(sel, q.correct);
       card.classList.add("locked", ok ? "is-right" : "is-wrong");
 
-      if (triggerGif) showReaction(ok, -1, card);  
+      if (triggerGif) showReaction(ok, card);
 
       $$("input", opts).forEach((i) => (i.disabled = true));
       $$(".option", opts).forEach((o) => {
@@ -376,13 +360,7 @@
     const sum = $("#exam-summary");
     sum.innerHTML = "";
 
-    const scoreRatio = right / total;
-    if (scoreRatio >= 0.5) {
-        showReaction(true, 4); // Điểm >= 50%: Hiện ảnh Pikachu vui vẻ (ảnh số 5)
-    } else {
-        showReaction(false, 4); // Điểm < 50%: Hiện ảnh Pokemon chán nản (ảnh số 5)
-    }
-    // ----------------------------------------------------
+    showReaction(right / total >= 0.5); // điểm >= 50%: GIF đúng, ngược lại: GIF sai (ngẫu nhiên)
 
     sum.className = "card score";
     sum.append(el("div", "muted", auto ? "Hết giờ, bài đã được nộp tự động." : "Kết quả bài thi"));
@@ -434,37 +412,31 @@
     renderReview();
   });
   // ---------------------------------------------------------------- hiệu ứng gif
-  function showReaction(isCorrect, forceIndex = -1, targetElement = null) {
-    let imgUrl = "";
-    let currentIndex = 0;
-
-    if (isCorrect) {
-      correctStreak++;
-      wrongStreak = 0;
-      currentIndex = (forceIndex !== -1) ? forceIndex : Math.min(correctStreak - 1, CORRECT_GIFS.length - 1);
-      imgUrl = CORRECT_GIFS[currentIndex];
-    } else {
-      wrongStreak++;
-      correctStreak = 0;
-      currentIndex = (forceIndex !== -1) ? forceIndex : Math.min(wrongStreak - 1, WRONG_GIFS.length - 1);
-      imgUrl = WRONG_GIFS[currentIndex];
-    }
-
+  // Chọn ngẫu nhiên 1 GIF trong danh sách đúng/sai.
+  // Máy tính: GIF bật ra bên phải thẻ câu hỏi. Điện thoại/màn hình hẹp (hoặc không có thẻ):
+  // GIF nổi ở góc dưới màn hình để không bị tràn hay che câu hỏi.
+  const narrowScreen = window.matchMedia ? window.matchMedia("(max-width: 850px)") : { matches: false };
+  function pickGif(isCorrect) {
+    const list = isCorrect ? CORRECT_GIFS : WRONG_GIFS;
+    if (!list.length) return "";
+    const key = isCorrect ? "right" : "wrong";
+    let i = Math.floor(Math.random() * list.length);
+    if (list.length > 1 && i === lastGif[key]) i = (i + 1 + Math.floor(Math.random() * (list.length - 1))) % list.length;
+    lastGif[key] = i;
+    return list[i];
+  }
+  function showReaction(isCorrect, targetElement) {
+    const url = pickGif(isCorrect);
+    if (!url) return;
+    const floating = narrowScreen.matches || !targetElement;
+    if (floating) document.querySelectorAll(".reaction-gif.floating").forEach((g) => g.remove());
     const img = document.createElement("img");
-    img.src = imgUrl;
-    img.className = "reaction-gif";
-    
-    // Sửa đoạn này: Nếu có targetElement (thẻ câu hỏi) thì gắn vào đó, nếu không thì gắn vào body
-    if (targetElement) {
-        targetElement.appendChild(img);
-    } else {
-        document.body.appendChild(img);
-    }
-
-    // Tự động xóa sau 3 giây
-    setTimeout(() => {
-      img.remove();
-    }, 3000);
+    img.src = url;
+    img.alt = "";
+    img.className = "reaction-gif" + (floating ? " floating" : "") + (isCorrect ? " is-right" : " is-wrong");
+    img.addEventListener("error", () => img.remove());
+    (floating ? document.body : targetElement).appendChild(img);
+    setTimeout(() => img.remove(), 3000);
   }
   // ---------------------------------------------------------------- init
   updateWrongCount();

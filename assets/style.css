@@ -195,31 +195,61 @@ code { font-family: "Fira Code", Consolas, monospace; font-size: .9em; backgroun
 .score th { color: var(--primary); font-weight: 800; }
 
 .app-footer { color: var(--muted); font-size: .85rem; text-align: center; padding: 20px 0 40px; font-weight: 600; }
-/* ---------- Hiệu ứng GIF Pokemon ---------- */
+/* ---------- Hiệu ứng GIF (danh sách ảnh ở gifs/gif_dung.js, gifs/gif_sai.js) ---------- */
+/* Máy tính: GIF bật ra bên phải thẻ câu hỏi */
 .reaction-gif {
   position: absolute;
-  top: 50%; /* Căn giữa theo chiều dọc */
-  right: -120px; /* Đẩy ảnh ra ngoài bên phải. Bạn có thể tăng giảm số này để ảnh xa/gần lại */
+  top: 50%;
+  right: -120px; /* tăng/giảm để GIF xa/gần thẻ câu hỏi */
   transform: translateY(-50%);
   z-index: 10;
-  width: 140px; /* Kích thước ảnh */
-  pointer-events: none; 
+  width: 140px;
+  height: auto;
+  pointer-events: none;
   animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), fadeOut 0.5s ease-in 2.5s forwards;
 }
 
-/* Nếu màn hình điện thoại thì ẩn ảnh đi để không bị tràn */
+/* Điện thoại / màn hình hẹp (hoặc khi nộp bài thi): GIF nổi ở góc dưới bên phải màn hình */
+.reaction-gif.floating {
+  position: fixed;
+  top: auto;
+  right: 12px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  transform: none;
+  z-index: 1000;
+  width: min(34vw, 150px);
+  max-height: 40vh;
+  object-fit: contain;
+  border-radius: 14px;
+  background: var(--card, #fff);
+  padding: 4px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  border: 3px solid var(--line, #ddd);
+  animation: popInFloat 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), fadeOutFloat 0.5s ease-in 2.5s forwards;
+}
+.reaction-gif.floating.is-right { border-color: var(--green, #2e8b57); }
+.reaction-gif.floating.is-wrong { border-color: var(--red, #d32f2f); }
+
+/* Màn hình hẹp: không cho GIF dạng bên-phải-thẻ xuất hiện (phòng khi xoay màn hình giữa chừng) */
 @media (max-width: 850px) {
-  .reaction-gif { display: none; }
+  .reaction-gif:not(.floating) { display: none; }
 }
 
 @keyframes popIn {
   0% { transform: translateY(-50%) scale(0.2); opacity: 0; }
   100% { transform: translateY(-50%) scale(1); opacity: 1; }
 }
-
 @keyframes fadeOut {
   0% { opacity: 1; transform: translateY(-50%) scale(1); }
   100% { opacity: 0; transform: translateY(-50%) scale(0.8); }
+}
+@keyframes popInFloat {
+  0% { transform: scale(0.2) translateY(30px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes fadeOutFloat {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.8) translateY(20px); }
 }
 /* Mobile */
 @media (max-width: 640px) {

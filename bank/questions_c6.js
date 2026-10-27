@@ -1,223 +1,388 @@
 // ============================================================================
-// CHƯƠNG 6: PyQt6 & Microsoft GUI (Tích hợp ML và Thiết kế giao diện)
-// Soạn dựa trên Slide 09 và 10 của TS. Trần Duy Thanh
+// CHƯƠNG 6: PyQt6 & Microsoft GUI (Tích hợp ML và thiết kế giao diện)
+// Nguồn: Slide 09 (PyQt6 và tích hợp mô hình máy học) và Slide 10 (Microsoft GUI)
 // Quy ước: Đáp án đúng luôn đặt ở ĐẦU mảng options (correct = [0]).
+// C(code) tạo khối code nhiều dòng.
 // ============================================================================
 const S = (id, chapter, difficulty, question, options, explanation) =>
   ({ id: "c6-" + id, chapter, difficulty, type: "single", question, options, correct: [0], explanation });
 const M = (id, chapter, difficulty, question, options, nCorrect, explanation) =>
   ({ id: "c6-" + id, chapter, difficulty, type: "multiple", question: question + " (chọn nhiều đáp án)", options,
      correct: Array.from({ length: nCorrect }, (_, i) => i), explanation });
+const C = (code) => "\n```\n" + code + "\n```\n";
+
+const ABC = "Công ty bán lẻ ABC có nhiều chi nhánh, dữ liệu purchase_retails gồm các cột invoice_no, customer_id, gender, age, category, quantity, price, payment_method, invoice_date, shopping_mall. ";
 
 const QUESTIONS_C6 = [
-// ================= PHẦN 1: PYQT6 & TÍCH HỢP ML =================
-S("q1", 6, 1, "Trong Case Study của Công ty ABC (bán lẻ), mô hình Hồi quy tuyến tính (Linear Regression) được sử dụng để dự báo biến mục tiêu nào?",
-  ["Price (Khả năng chi tiêu/số tiền mua hàng)", "Gender (Giới tính)", "Age (Độ tuổi)", "Payment_method (Phương thức thanh toán)"],
-  "Slide 09: Xây dựng mô hình máy học sử dụng Hồi quy tuyến tính để dự báo: Dự báo khả năng chi tiêu (price) dựa vào Giới tính và độ tuổi..."),
+// ================= PYQT6 - CASE STUDY CÔNG TY ABC =================
+M("q54", 6, 1, "Mục tiêu khi tích hợp mô hình máy học vào phần mềm PyQt6 gồm những gì?",
+  ["Thiết kế giao diện phù hợp để triển khai mô hình máy học", "Thực hiện đầy đủ các bước cần thiết của chu trình phát triển mô hình", "Triệu gọi mô hình và hiển thị kết quả lên các Widget của PyQt6", "Viết lại thư viện scikit-learn"], 3,
+  "Đồng thời ứng dụng các Widget từ cơ bản đến nâng cao của PyQt6."),
 
-S("q2", 6, 2, "Trong Case Study, mô hình Clustering (Gom cụm) được sử dụng để gom nhóm khách hàng dựa trên các tiêu chí nào?",
-  ["gender, age, payment_method", "invoice_no, customer_id, category", "price, quantity, shopping_mall", "age, price, invoice_date"],
-  "Slide 09: Xây dựng mô hình máy học để gom cụm khách hàng theo các tiêu chí: gender, age, payment_method."),
+S("q1", 6, 1, ABC + "Mô hình hồi quy tuyến tính được dùng để dự báo biến mục tiêu nào?",
+  ["price (khả năng chi tiêu)", "gender", "payment_method", "shopping_mall"],
+  "Dự báo price dựa vào gender, age (và payment_method)."),
 
-S("q3", 6, 2, "Theo kết quả đồ thị Elbow trong slide, số cụm (k) tối ưu được chọn để phân cụm khách hàng là bao nhiêu?",
-  ["3", "4", "5", "2"],
-  "Slide 09 (Hình Elbow method): Điểm khuỷu tay (elbow) xuất hiện tại vị trí Number of Clusters = 3."),
+M("q55", 6, 2, ABC + "Hai mô hình hồi quy tuyến tính được yêu cầu xây dựng dùng những tập biến đầu vào nào?",
+  ["gender và age", "gender, age và payment_method", "category và shopping_mall", "invoice_no và customer_id"], 2,
+  "Biến mục tiêu đều là price."),
 
-M("q4", 6, 2, "Theo yêu cầu của Công ty ABC, những thống kê nào sau đây cần được thực hiện để hỗ trợ ra quyết định kinh doanh?",
-  ["Thống kê tỉ lệ mua hàng theo giới tính", "Thống kê mua hàng theo nhóm độ tuổi", "Thống kê phân bổ mua hàng theo danh mục", "Thống kê doanh thu của đối thủ cạnh tranh"], 3,
-  "Slide 09: Các yêu cầu gồm thống kê theo giới tính, nhóm tuổi, danh mục, phương thức thanh toán, chi nhánh... Không có thống kê đối thủ."),
+S("q2", 6, 2, ABC + "Mô hình gom cụm khách hàng dùng những tiêu chí nào?",
+  ["gender, age, payment_method", "price, quantity, category", "invoice_date, shopping_mall", "customer_id, invoice_no"],
+  "Dùng K-Means, chọn số cụm bằng phương pháp Elbow."),
 
-S("q5", 6, 3, "Trong hình minh họa kết quả dự báo của mô hình Linear Regression: `Gender=Female and Age=61 and payment=Credit Card=>Price=[686.61184381]`. Đây là bài toán dự báo gì?",
-  ["Dự báo giá trị số liên tục (Hồi quy)", "Dự báo nhãn phân loại (Classification)", "Phân cụm khách hàng (Clustering)", "Dự báo chuỗi thời gian (Time series)"],
-  "Slide 09 (Hình Console): Output trả về một giá trị số cụ thể (686.61), đây là đặc trưng của bài toán Hồi quy (Regression)."),
+S("q56", 6, 2, "Muốn đưa các cột gender (Male/Female) và payment_method (Cash/Credit Card/Debit Card) vào mô hình hồi quy hoặc K-Means, cần làm gì trước?",
+  ["Mã hóa giá trị chữ thành số (ví dụ Female = 0, Male = 1; Cash = 0, Credit Card = 1, Debit Card = 2)", "Xóa hai cột này", "Đổi tên cột", "Chuyển sang kiểu ngày tháng"],
+  "Thuật toán chỉ làm việc trên dữ liệu số; histogram payment_method có giá trị 0.0, 1.0, 2.0."),
 
-S("q6", 6, 3, "Trong kết quả đánh giá mô hình Linear Regression trên slide, các chỉ số MAE, MSE, RMSE lần lượt có giá trị xấp xỉ là:",
-  ["695.79, 900755.13, 949.08", "949.08, 900755.13, 695.79", "695.79, 949.08, 900755.13", "900755.13, 695.79, 949.08"],
-  "Slide 09 (Hình Console): MAE=695.799..., MSE=900755.136..., RMSE=949.081..."),
+S("q3", 6, 2, ABC + "Khi gom cụm theo gender, age, payment_method, đồ thị Elbow cho inertia giảm rất mạnh đến K = 3, sau đó gần như phẳng. Nên chọn số cụm là bao nhiêu?",
+  ["3", "1", "10", "6"],
+  "Chọn điểm khuỷu tay, nơi mức giảm của inertia chậm lại rõ rệt."),
 
-S("q7", 6, 2, "Để trực quan hóa kết quả phân cụm 3 chiều (3D) trong PyQt6/Python, slide sử dụng thư viện nào?",
-  ["Plotly (px.scatter_3d)", "Matplotlib (plt.scatter)", "Seaborn (sns.scatterplot)", "PyQtGraph"],
-  "Slide 09 (Hình 3D): Trình duyệt hiển thị biểu đồ 3D tương tác, đây là đặc trưng của thư viện Plotly Express (`px.scatter_3d`)."),
+M("q4", 6, 2, ABC + "Những thống kê nào được yêu cầu để hỗ trợ công ty ra quyết định?",
+  ["Tỉ lệ mua hàng theo giới tính, theo nhóm độ tuổi", "Phân bổ mua hàng theo danh mục, số lượng mua theo danh mục và giới tính", "Tỉ lệ phương thức thanh toán, tỉ lệ mua theo chi nhánh, biến động doanh số theo tháng/năm", "Thống kê số lượng nhân viên theo phòng ban"], 3,
+  "Dữ liệu không có thông tin nhân viên."),
 
-S("q8", 6, 2, "Trong các biểu đồ thống kê của Slide 09, biểu đồ nào được sử dụng để biểu diễn 'Thống kê tỉ lệ mua hàng theo giới tính'?",
-  ["Biểu đồ tròn (Pie chart)", "Biểu đồ cột (Bar chart)", "Biểu đồ đường (Line chart)", "Biểu đồ phân tán (Scatter plot)"],
-  "Slide 09 (Hình Gender Distribution): Sử dụng biểu đồ tròn (Pie chart) để thể hiện tỉ lệ phần trăm."),
+S("q57", 6, 2, "Thống kê tỉ lệ lựa chọn phương thức thanh toán (Cash, Credit Card, Debit Card) giúp công ty bán lẻ điều gì?",
+  ["Có phương án thay đổi phương thức thanh toán hiệu quả nhất cho khách hàng", "Tính lương nhân viên", "Dự báo thời tiết", "Phân loại sản phẩm lỗi"],
+  "Thống kê tỉ lệ mua theo chi nhánh giúp điều chỉnh kinh doanh theo khu vực."),
 
-// ================= PHẦN 2: MICROSOFT GUI (C# WINDOWS FORMS) =================
-S("q9", 6, 1, "Trong lập trình giao diện với C# Windows Forms, đối tượng nào đại diện cho một cửa sổ hoặc hộp thoại của ứng dụng?",
-  ["Form", "Window", "Dialog", "Panel"],
-  "Slide 10: Form đại diện cho một cửa sổ hoặc hộp thoại tạo nên giao diện người dùng của ứng dụng."),
+S("q58", 6, 2, "Thống kê phân bổ mua hàng theo danh mục nhằm mục đích gì?",
+  ["Nhận biết danh mục bán nhiều nhất, ít nhất để tiếp cận khách hàng theo danh mục phù hợp hơn", "Xác định giới tính khách hàng", "Tính thuế", "Gom cụm chi nhánh"],
+  "Thường biểu diễn bằng biểu đồ tròn (Categories Distribution)."),
 
-S("q10", 6, 2, "Thuộc tính nào của Form dùng để thay đổi tiêu đề (title bar) của cửa sổ?",
+S("q5", 6, 2, "Một mô hình in ra `Gender=Female and Age=61 and payment=Credit Card=>Price=[686.61184381]`. Đây là kết quả của bài toán gì?",
+  ["Dự báo khả năng chi tiêu (price) bằng hồi quy tuyến tính dựa trên gender, age, payment_method", "Phân loại phương thức thanh toán", "Gom cụm khách hàng", "Thống kê tần suất mua hàng"],
+  "Đầu ra là giá trị số liên tục nên là hồi quy."),
+
+S("q11", 6, 2, "Mô hình hồi quy dự báo price có MSE ≈ 900755.14. RMSE xấp xỉ bao nhiêu?",
+  ["949.08", "450377.57", "695.80", "30.01"],
+  "RMSE = sqrt(MSE) ≈ 949.08."),
+
+S("q59", 6, 2, "Sau khi huấn luyện xong mô hình dự báo price, chương trình in `ret save model=True`. Điều này cho biết gì?",
+  ["Mô hình đã được lưu thành công để tái sử dụng", "Mô hình huấn luyện thất bại", "Dữ liệu đã bị xóa", "MSE bằng True"],
+  "Lưu mô hình để lần sau chỉ cần tải và dự đoán."),
+
+S("q6", 6, 1, "Biểu đồ nào phù hợp để biểu diễn tỉ lệ phần trăm mua hàng theo giới tính (Gender Distribution)?",
+  ["Biểu đồ tròn (pie chart)", "Biểu đồ đường", "Biểu đồ phân tán", "Histogram"],
+  "Pie chart thể hiện cơ cấu tỉ lệ."),
+
+S("q7", 6, 2, "Muốn thể hiện số lượt mua theo từng độ tuổi và giới tính (Age VS Order Frequence) với mỗi điểm là một cặp (tuổi, số lượt), loại biểu đồ nào phù hợp?",
+  ["Biểu đồ phân tán (scatter plot)", "Biểu đồ tròn", "Biểu đồ 3D", "Bản đồ nhiệt"],
+  "Mỗi điểm biểu diễn một nhóm (age, gender) và số lượt mua."),
+
+S("q8", 6, 2, "Muốn so sánh tổng giá trị mua hàng giữa các danh mục (Books, Clothing, Shoes...), loại biểu đồ nào phù hợp?",
+  ["Biểu đồ cột (bar chart)", "Biểu đồ tròn 3D", "Biểu đồ phân tán", "Biểu đồ hộp"],
+  "Biểu đồ cột so sánh giá trị giữa các nhóm rời rạc."),
+
+S("q60", 6, 2, "Muốn so sánh số lượng mua theo danh mục giữa Female và Male trên cùng một biểu đồ, loại nào phù hợp?",
+  ["Biểu đồ cột nhóm (grouped bar) với mỗi giới tính một màu", "Biểu đồ tròn", "Một đường duy nhất", "Biểu đồ phân tán 3D"],
+  "Mỗi danh mục có 2 cột cạnh nhau."),
+
+S("q9", 6, 2, "Biểu diễn biến động doanh số theo tháng của các năm 2021, 2022, 2023 trên cùng một biểu đồ nên dùng cách nào?",
+  ["Biểu đồ đường, mỗi năm một đường (trục x là tháng)", "Ba biểu đồ tròn", "Biểu đồ phân tán không chú thích", "Một cột duy nhất"],
+  "Giúp so sánh xu hướng giữa các năm."),
+
+S("q10", 6, 2, "Để trực quan hóa kết quả gom cụm khách hàng theo 3 thuộc tính dưới dạng 3D có thể xoay và xem chi tiết từng điểm, dùng thư viện nào?",
+  ["Plotly (plotly.express.scatter_3d)", "Seaborn histplot", "Tkinter", "Excel"],
+  "Biểu đồ hiển thị trên trình duyệt và có hover_data."),
+
+S("q61", 6, 3, "Sau khi gom cụm, chương trình in danh sách 'Customer in cluster 0', 'Customer in cluster 1'... Cách lấy danh sách khách hàng của cụm 0 từ DataFrame df có cột cluster là gì?",
+  ["df[df['cluster'] == 0]", "df.cluster(0)", "df.loc['cluster' == 0]", "df.groupby(0)"],
+  "Lọc dòng theo điều kiện trên cột cluster."),
+
+// ================= MICROSOFT GUI: TỔNG QUAN & FORM =================
+S("q62", 6, 1, "Thứ tự phát triển công nghệ giao diện của Microsoft là gì?",
+  ["Console/cmd -> Windows Form -> WPF -> Universal", "WPF -> Console -> Universal -> Windows Form", "Universal -> WPF -> Windows Form -> Console", "Windows Form -> Console -> Universal -> WPF"],
+  "Công cụ lập trình: Visual Studio."),
+
+S("q12", 6, 1, "Trong C# Windows Forms, đối tượng nào đại diện cho một cửa sổ hoặc hộp thoại của ứng dụng?",
+  ["Form", "Panel", "Label", "Control"],
+  "Form tạo nên giao diện người dùng của ứng dụng."),
+
+S("q63", 6, 1, "Cách thêm một Form mới vào project Windows Forms trong Visual Studio là gì?",
+  ["Chuột phải vào tên Project -> Add -> chọn Form (Windows Forms)", "File -> New -> Database", "Chuột phải vào Form1 -> Delete", "Tools -> Options -> Form"],
+  "Sau đó đặt tên Form và thiết kế giao diện."),
+
+S("q13", 6, 1, "Thuộc tính nào của Form dùng để đổi tiêu đề trên thanh tiêu đề?",
   ["Text", "Name", "Title", "Caption"],
-  "Slide 10 (Bảng thuộc tính Form): Thuộc tính `Text` lấy hoặc thiết lập văn bản liên kết với control (đối với Form, đây là tiêu đề cửa sổ)."),
+  "Name là tên dùng trong code."),
 
-S("q11", 6, 2, "Thuộc tính `WindowState` của Form có các giá trị nào sau đây?",
-  ["Normal, Minimized, Maximized", "Open, Close, Hide", "Left, Right, Center", "Top, Bottom, Middle"],
-  "Slide 10: WindowState có các giá trị Normal, Minimized, Maximized."),
+S("q14", 6, 2, "Thuộc tính nào quy định vị trí Form khi chạy (Manual, CenterScreen, WindowsDefaultLocation, WindowsDefaultBounds, CenterParent)?",
+  ["StartPosition", "Location", "WindowState", "TopMost"],
+  "Location là tọa độ góc trên bên trái của Form."),
 
-S("q12", 6, 2, "Thuộc tính nào của Form quy định vị trí xuất hiện của Form khi chạy (ví dụ: CenterScreen)?",
-  ["StartPosition", "Location", "Position", "TopMost"],
-  "Slide 10: StartPosition xác định vị trí bắt đầu của form khi chạy (Manual, CenterScreen, WindowsDefaultLocation...)."),
+S("q64", 6, 2, "Thuộc tính WindowState của Form nhận những giá trị nào?",
+  ["Normal, Minimized, Maximized", "None, FixedSingle, Sizable", "True, False", "Manual, CenterScreen"],
+  "WindowState là trạng thái cửa sổ."),
 
-S("q13", 6, 2, "Thuộc tính `FormBorderStyle` của Form có tác dụng gì?",
-  ["Thiết lập kiểu đường viền của cửa sổ (None, FixedSingle, Sizable...)", "Thay đổi màu nền của Form", "Gắn icon cho Form", "Thiết lập độ mờ (Opacity) của Form"],
-  "Slide 10: FormBorderStyle lấy hoặc thiết lập kiểu đường viền của form."),
+S("q65", 6, 2, "Thuộc tính TopMost = true của Form có tác dụng gì?",
+  ["Form luôn hiển thị nằm trên cùng các cửa sổ khác", "Form ở góc trên màn hình", "Form không thể đóng", "Form có thanh menu ở trên"],
+  "Gets or sets whether the form should be displayed as a topmost form."),
 
-S("q14", 6, 3, "Thuộc tính `AcceptButton` của Form có tác dụng gì?",
-  ["Xác định nút nào trên Form sẽ được click khi người dùng nhấn phím ENTER", "Xác định nút nào sẽ đóng Form", "Xác định nút nào sẽ được click khi nhấn phím ESC", "Xác định nút mặc định khi Form load"],
-  "Slide 10: AcceptButton xác định nút được click khi nhấn phím ENTER. CancelButton dùng cho phím ESC."),
+S("q15", 6, 2, "Thuộc tính FormBorderStyle của Form có tác dụng gì?",
+  ["Quy định kiểu viền Form: None, FixedSingle, Fixed3D, FixedDialog, Sizable, FixedToolWindow, SizableToolWindow", "Đổi màu nền", "Đặt ảnh nền", "Đặt độ trong suốt"],
+  "Sizable cho phép kéo đổi kích thước."),
 
-S("q15", 6, 1, "Sự kiện `Load` của Form xảy ra khi nào?",
-  ["Xảy ra trước khi Form được hiển thị lần đầu tiên", "Xảy ra sau khi Form đã đóng", "Xảy ra khi người dùng click chuột vào Form", "Xảy ra khi người dùng nhấn phím bất kỳ"],
-  "Slide 10: Sự kiện Load xảy ra trước khi form được hiển thị lần đầu tiên."),
+S("q66", 6, 2, "Thuộc tính nào của Form điều chỉnh độ trong suốt của cửa sổ?",
+  ["Opacity", "BackColor", "Visible", "Transparent"],
+  "Ví dụ Opacity = 80%."),
 
-S("q16", 6, 2, "Sự kiện `FormClosing` và `FormClosed` khác nhau ở điểm nào?",
-  ["FormClosing xảy ra TRƯỚC khi form đóng, FormClosed xảy ra SAU khi form đã đóng", "FormClosing xảy ra SAU khi form đóng, FormClosed xảy ra TRƯỚC khi form đóng", "Cả hai xảy ra cùng lúc", "FormClosed dùng để chặn việc đóng form"],
-  "Slide 10: FormClosing occurs before the form is closed. FormClosed occurs after the form is closed."),
+M("q67", 6, 2, "Những thuộc tính nào là thuộc tính của Windows Form?",
+  ["BackColor, BackgroundImage, ForeColor", "MainMenuStrip, Cursor, Icon", "Location, Opacity, Font", "PasswordChar, Multiline"], 3,
+  "PasswordChar, Multiline là thuộc tính của TextBox."),
 
-M("q17", 6, 2, "Những sự kiện nào sau đây liên quan đến chuột (Mouse) của Form/Control?",
-  ["MouseClick", "MouseDown", "MouseEnter", "KeyPress"], 3,
-  "Slide 10: Các sự kiện chuột gồm MouseClick, MouseDoubleClick, MouseDown, MouseEnter, MouseHover, MouseLeave, MouseMove, MouseUp, MouseWheel. KeyPress là sự kiện bàn phím."),
+S("q16", 6, 2, "Thuộc tính AcceptButton của Form có tác dụng gì?",
+  ["Chỉ định nút được kích hoạt khi người dùng nhấn phím ENTER", "Chỉ định nút được kích hoạt khi nhấn ESC", "Ẩn mọi nút trên Form", "Đặt nút mặc định ở góc phải"],
+  "CancelButton là nút được kích hoạt khi nhấn ESC."),
 
-S("q18", 6, 2, "Mục đích chính của control `Panel` là gì?",
-  ["Tạo các khu vực để nhóm và sắp xếp các control bên trong nó theo ý muốn", "Hiển thị hình ảnh", "Nhập văn bản nhiều dòng", "Chọn ngày tháng"],
-  "Slide 10: Panel tạo khu vực để nhóm các control, có thể di chuyển toàn bộ các control bên trong bằng cách kéo Panel."),
+S("q68", 6, 2, "Trên form đăng nhập có nút Login và Exit. Muốn nhấn ESC thì tương đương bấm nút Exit, ta đặt thuộc tính nào của Form?",
+  ["CancelButton = nút Exit", "AcceptButton = nút Exit", "KeyPreview = nút Exit", "TabIndex của Exit = 0"],
+  "AcceptButton dành cho phím ENTER."),
 
-S("q19", 6, 2, "Control `FlowLayoutPanel` có đặc điểm gì nổi bật?",
-  ["Tự động sắp xếp các control con theo một hướng (FlowDirection) như từ trên xuống, trái sang phải...", "Chia giao diện thành 2 vùng có thể kéo thay đổi kích thước", "Hiển thị dữ liệu dạng cây", "Hiển thị dữ liệu dạng bảng"],
-  "Slide 10: FlowLayoutPanel có thuộc tính FlowDirection (TopDown, LeftToRight...) để tự động sắp xếp các control."),
+S("q17", 6, 1, "Sự kiện Load của Form xảy ra khi nào?",
+  ["Trước khi Form được hiển thị lần đầu", "Sau khi Form đóng", "Khi người dùng click vào Form", "Khi nhấn phím"],
+  "Thường dùng để khởi tạo dữ liệu, ví dụ nạp phần tử cho ListBox."),
 
-S("q20", 6, 2, "Control `SplitContainer` dùng để làm gì?",
-  ["Chia giao diện thành hai vùng (Panel) có thanh trượt ở giữa để người dùng thay đổi kích thước", "Hiển thị một menu các lựa chọn", "Tạo một hộp thoại thông báo", "Hiển thị biểu đồ"],
-  "Slide 10: SplitContainer chia giao diện thành 2 Panel, có thuộc tính Orientation (Vertical/Horizontal)."),
+S("q18", 6, 2, "Sự kiện FormClosing và FormClosed khác nhau thế nào?",
+  ["FormClosing xảy ra trước khi Form đóng; FormClosed xảy ra sau khi Form đã đóng", "FormClosing xảy ra sau khi đóng; FormClosed xảy ra trước", "Hai sự kiện giống nhau", "FormClosed xảy ra khi mở Form"],
+  "FormClosing có thể dùng để hỏi xác nhận trước khi thoát."),
 
-S("q21", 6, 1, "Control nào dùng để hiển thị một chuỗi văn bản (không cho người dùng sửa) trên Form?",
-  ["Label", "TextBox", "RichTextBox", "Button"],
-  "Slide 10: Label được sử dụng để biểu diễn một chuỗi hoặc văn bản trên form."),
+S("q69", 6, 2, "Sự kiện nào xảy ra khi một phím được NHẢ ra trong lúc control đang có focus?",
+  ["KeyUp", "KeyDown", "KeyPress", "Click"],
+  "KeyDown và KeyPress xảy ra khi phím được nhấn."),
 
-S("q22", 6, 2, "Thuộc tính `PasswordChar` của TextBox có tác dụng gì?",
-  ["Thay thế các ký tự nhập vào bằng một ký tự khác (ví dụ dấu *) để ẩn mật khẩu", "Giới hạn độ dài mật khẩu", "Mã hóa mật khẩu trước khi lưu", "Tự động điền mật khẩu"],
-  "Slide 10: PasswordChar khai báo ký tự thay thế khi nhập mật khẩu."),
+M("q19", 6, 2, "Những sự kiện nào liên quan đến chuột của Form/Control?",
+  ["MouseClick, MouseDoubleClick", "MouseEnter, MouseHover, MouseLeave", "MouseDown, MouseUp, MouseMove, MouseWheel", "KeyPress, KeyUp"], 3,
+  "KeyPress, KeyUp là sự kiện bàn phím."),
 
-S("q23", 6, 2, "Thuộc tính `Multiline` của TextBox có tác dụng gì?",
-  ["Cho phép nhập văn bản trên nhiều dòng", "Cho phép nhập nhiều mật khẩu", "Cho phép hiển thị nhiều TextBox cùng lúc", "Cho phép kéo giãn TextBox"],
-  "Slide 10: Multiline nếu set bằng true, nội dung trong textbox sẽ được viết trên nhiều dòng."),
+S("q70", 6, 2, "Sự kiện nào xảy ra khi con trỏ chuột dừng lại (rest) trên control?",
+  ["MouseHover", "MouseEnter", "MouseMove", "MouseLeave"],
+  "MouseEnter: khi chuột đi vào; MouseLeave: khi chuột rời đi."),
 
-S("q24", 6, 1, "Control nào cho phép người dùng chọn NHIỀU lựa chọn cùng lúc?",
-  ["CheckBox", "RadioButton", "Label", "TextBox"],
-  "Slide 10: Checkbox cho phép chọn nhiều option. RadioButton chỉ cho chọn 1 option."),
+// ================= CONTAINER =================
+S("q20", 6, 1, "Mục đích chính của control Panel là gì?",
+  ["Tạo vùng để nhóm, sắp xếp các control; kéo Panel thì toàn bộ control bên trong di chuyển theo", "Hiển thị hình ảnh", "Nhập mật khẩu", "Vẽ biểu đồ"],
+  "Panel nằm trong nhóm Containers của Toolbox."),
 
-S("q25", 6, 2, "Khi thiết kế RadioButton, ta BẮT BUỘC phải kết hợp với control nào để nhóm các RadioButton lại với nhau?",
-  ["GroupBox", "Panel", "FlowLayoutPanel", "TabControl"],
-  "Slide 10: Must combine with GroupBox to group RadioButtons (required). Nếu không có GroupBox, các RadioButton trên cùng Form sẽ bị gộp thành 1 nhóm và chỉ chọn được 1."),
+S("q71", 6, 2, "Đặt thuộc tính Dock = Top cho một Panel thì Panel sẽ thế nào?",
+  ["Neo vào cạnh trên của Form và giãn theo chiều ngang của Form", "Ẩn đi", "Nằm giữa Form", "Xoay 90 độ"],
+  "Dock có các giá trị None, Top, Bottom, Left, Right, Fill."),
 
-S("q26", 6, 2, "Control `PictureBox` được sử dụng để làm gì?",
-  ["Hiển thị hình ảnh trên giao diện", "Chụp ảnh màn hình", "Vẽ biểu đồ", "Chỉnh sửa ảnh"],
-  "Slide 10: PictureBox được sử dụng để hiển thị hình ảnh trên giao diện."),
+S("q21", 6, 2, "Control FlowLayoutPanel có đặc điểm gì?",
+  ["Tự động sắp xếp các control bên trong theo một hướng (FlowDirection: LeftToRight, TopDown, RightToLeft, BottomUp)", "Chỉ chứa được một control", "Dùng để vẽ biểu đồ", "Tự động chia Form thành hai nửa"],
+  "Khác Panel thường phải tự đặt vị trí từng control."),
 
-S("q27", 6, 2, "Thuộc tính `SizeMode` của PictureBox dùng để làm gì?",
-  ["Thiết lập chế độ hiển thị hình ảnh (StretchImage, Zoom, CenterImage...)", "Thay đổi kích thước của control", "Đặt ảnh làm nền", "Chọn định dạng ảnh"],
-  "Slide 10: SizeMode thiết lập hình dáng, cách hiển thị của ảnh (Image appearance)."),
+S("q22", 6, 2, "Control SplitContainer dùng để làm gì?",
+  ["Chia vùng thành hai panel (Panel1, Panel2) có thanh chia, có thể đặt Orientation là Vertical hoặc Horizontal", "Hiển thị dữ liệu dạng cây", "Nhập ngày tháng", "Hiển thị ảnh"],
+  "Người dùng có thể kéo thanh chia để thay đổi kích thước hai vùng."),
 
-S("q28", 6, 2, "Control `DateTimePicker` khác gì với `MonthCalendar`?",
-  ["DateTimePicker hiển thị ngày dưới dạng textbox có nút thả xuống, MonthCalendar hiển thị toàn bộ lịch tháng", "DateTimePicker chỉ chọn được giờ, MonthCalendar chọn được ngày", "DateTimePicker có giao diện lịch tháng, MonthCalendar chỉ có textbox", "Cả hai hoàn toàn giống nhau"],
-  "Slide 10: DateTimePicker hiển thị ngày dạng textbox + dropdown lịch. MonthCalendar hiển thị nguyên một tờ lịch tháng trên form."),
+// ================= CONTROL CƠ BẢN =================
+S("q23", 6, 1, "Control nào dùng để hiển thị một chuỗi văn bản trên Form (tên thường bắt đầu bằng lbl)?",
+  ["Label", "TextBox", "Button", "ComboBox"],
+  "Thuộc tính: Name, Text, BackColor, ForeColor, Font."),
 
-S("q29", 6, 3, "Thuộc tính `Format` của DateTimePicker nhận giá trị `CustomFormat` khi nào?",
-  ["Khi muốn hiển thị ngày theo định dạng do người dùng tự định nghĩa", "Khi muốn hiển thị ngày theo chuẩn mặc định của Windows", "Khi muốn ẩn control này đi", "Khi muốn khóa không cho chọn ngày"],
-  "Slide 10: CustomFormat cho phép hiển thị ngày theo định dạng của người dùng."),
+S("q72", 6, 1, "Quy ước đặt tên control nào đúng?",
+  ["Label: lbl, TextBox: txt, CheckBox: chk, RadioButton: rad, PictureBox: pic, ListBox: lst, ComboBox: cbo, DateTimePicker: dtp", "Label: txt, TextBox: lbl", "ListBox: cbo, ComboBox: lst", "PictureBox: dtp, DateTimePicker: pic"],
+  "Đặt tiền tố giúp nhận biết loại control trong code."),
 
-S("q30", 6, 1, "Control nào cho phép người dùng chọn một hoặc nhiều phần tử từ một danh sách hiển thị sẵn?",
-  ["ListBox", "Label", "TextBox", "PictureBox"],
-  "Slide 10: ListBox tạo một danh sách cho người dùng chọn."),
+S("q73", 6, 1, "TextBox được dùng để làm gì?",
+  ["Cho người dùng nhập thông tin vào chương trình", "Hiển thị ảnh", "Chọn ngày", "Hiển thị biểu đồ"],
+  "Thuộc tính Enabled quyết định TextBox có hoạt động hay không."),
 
-S("q31", 6, 2, "Thuộc tính `SelectionMode` của ListBox dùng để làm gì?",
-  ["Quy định cách chọn trong danh sách (chỉ chọn một hoặc cho phép chọn nhiều)", "Thay đổi màu sắc của ListBox", "Thêm phần tử vào ListBox", "Sắp xếp các phần tử trong ListBox"],
-  "Slide 10: SelectionMode quy định cách chọn (One, MultiSimple, MultiExtended...)."),
+S("q24", 6, 1, "Thuộc tính PasswordChar của TextBox có tác dụng gì?",
+  ["Khai báo ký tự thay thế khi nhập mật khẩu (ví dụ '*')", "Mã hóa mật khẩu", "Giới hạn độ dài", "Kiểm tra độ mạnh mật khẩu"],
+  "Nội dung thật vẫn nằm trong thuộc tính Text."),
 
-S("q32", 6, 2, "Để lấy chỉ số (vị trí) của phần tử đang được chọn trong ListBox, ta dùng thuộc tính nào?",
-  ["SelectedIndex", "SelectedItem", "SelectedIndices", "Items.Count"],
-  "Slide 10: SelectedIndex trả về chỉ số của phần tử được chọn. SelectedItem trả về giá trị phần tử. SelectedIndices trả về tập các chỉ số (khi chọn nhiều)."),
+S("q25", 6, 1, "Thuộc tính Multiline = true của TextBox có tác dụng gì?",
+  ["Cho phép nội dung viết trên nhiều dòng", "Cho phép nhiều người nhập", "Hiển thị nhiều TextBox", "Tự động xuống dòng mỗi ký tự"],
+  "Mặc định TextBox chỉ một dòng."),
 
-S("q33", 6, 2, "Để lấy GIÁ TRỊ của phần tử đang được chọn trong ListBox, ta dùng thuộc tính nào?",
-  ["SelectedItem", "SelectedIndex", "Items.Count", "Text"],
-  "Slide 10: SelectedItem trả về phần tử được chọn (giá trị). SelectedIndex trả về vị trí."),
+S("q26", 6, 1, "Thuộc tính ReadOnly = true của TextBox có tác dụng gì?",
+  ["Chỉ cho đọc, không cho sửa nội dung", "Ẩn TextBox", "Xóa nội dung", "Chuyển chữ thành in hoa"],
+  "Khác Enabled = false là control bị vô hiệu hóa hoàn toàn."),
 
-S("q34", 6, 2, "Thuộc tính `Items.Count` của ListBox dùng để làm gì?",
-  ["Trả về số lượng phần tử trong ListBox", "Đếm số phần tử đang được chọn", "Đếm số ký tự trong phần tử đang chọn", "Đếm số ListBox trên Form"],
-  "Slide 10: Items.Count trả về số lượng phần tử trong Listbox."),
+S("q74", 6, 2, "Form phân loại GPA cần: 4.00-3.67 Excellent (Blue), 3.66-3.00 Very Good (Green), 2.99-2.33 Good (Purple), 2.32-2.00 Fair (Orange), dưới 2.00 Fail (Red). Nhập GPA = 3.20 thì kết quả là gì?",
+  ["Very Good, màu Green", "Excellent, màu Blue", "Good, màu Purple", "Fair, màu Orange"],
+  "3.20 nằm trong khoảng 3.00 - 3.66."),
 
-M("q35", 6, 2, "Những phương thức nào sau đây dùng để thêm phần tử vào ListBox?",
-  ["Add", "AddRange", "Insert", "Remove"], 3,
-  "Slide 10: Thêm phần tử dùng Add, AddRange, Insert. Remove/RemoveAt/Clear dùng để xóa."),
+S("q27", 6, 1, "Control nào cho phép người dùng chọn NHIỀU lựa chọn cùng lúc?",
+  ["CheckBox", "RadioButton", "Label", "ProgressBar"],
+  "RadioButton chỉ cho chọn 1 trong nhóm."),
 
-S("q36", 6, 3, "Cho đoạn code sau:\n`listBox1.Items.Clear();`\n`for (int i = 0; i < 10; i++) listBox1.Items.Add(\"Item \" + i);`\nĐoạn code này thực hiện công việc gì?",
-  ["Xóa toàn bộ phần tử cũ và thêm 10 phần tử mới từ Item 0 đến Item 9 vào ListBox", "Thêm 10 phần tử vào sau các phần tử cũ", "Xóa 10 phần tử đầu tiên của ListBox", "Đếm số phần tử trong ListBox"],
-  "Slide 10 (Code Demo): Đoạn code trong sự kiện Load thực hiện xóa rỗng ListBox và thêm 10 phần tử."),
+S("q28", 6, 2, "Khi thiết kế RadioButton, bắt buộc phải kết hợp với control nào để nhóm các lựa chọn?",
+  ["GroupBox", "Panel", "ListBox", "TextBox"],
+  "Mỗi GroupBox là một nhóm lựa chọn độc lập."),
 
-S("q37", 6, 2, "Control `ComboBox` khác `ListBox` ở điểm cơ bản nào?",
-  ["ComboBox hiển thị dạng danh sách thả xuống và KHÔNG hỗ trợ chọn nhiều phần tử", "ComboBox hỗ trợ chọn nhiều phần tử, ListBox thì không", "ComboBox không có thuộc tính SelectedItem", "ComboBox không thể thêm phần tử bằng code"],
-  "Slide 10: Combobox cung cấp danh sách lựa chọn như ListBox nhưng khác ở cách hiển thị (thả xuống) và không hỗ trợ chọn nhiều."),
+S("q75", 6, 1, "Thuộc tính nào cho biết CheckBox hoặc RadioButton đang được chọn?",
+  ["Checked (true là đang chọn)", "Selected", "Value", "IsOn"],
+  "Text là tiêu đề hiển thị bên phải control."),
 
-S("q38", 6, 2, "Control nào cho phép hiển thị văn bản có định dạng (in đậm, in nghiêng, màu sắc khác nhau) ngay trên giao diện?",
-  ["RichTextBox", "TextBox", "Label", "ListBox"],
-  "Slide 10: RichTextBox cho phép hiển thị văn bản có định dạng (như hình minh họa đoạn văn Text Mining được in đậm)."),
+S("q29", 6, 1, "Control PictureBox dùng để làm gì?",
+  ["Hiển thị hình ảnh trên giao diện", "Nhập văn bản", "Hiển thị danh sách", "Chọn ngày tháng"],
+  "Dùng thuộc tính Image hoặc BackgroundImage."),
 
-S("q39", 6, 2, "Control `ListView` được sử dụng để làm gì?",
-  ["Hiển thị dữ liệu dưới dạng lưới (có dòng, cột)", "Hiển thị dữ liệu dạng cây phân cấp", "Hiển thị biểu đồ", "Hiển thị hình ảnh"],
-  "Slide 10: ListView là control dùng để hiển thị dữ liệu dưới dạng lưới (grid)."),
+S("q30", 6, 2, "Thuộc tính SizeMode của PictureBox dùng để làm gì?",
+  ["Thiết lập cách ảnh hiển thị (co giãn, căn giữa, phóng to theo khung...)", "Thay đổi kích thước file ảnh", "Đổi định dạng ảnh", "Xoay ảnh"],
+  "BackgroundImageLayout có vai trò tương tự với BackgroundImage."),
 
-S("q40", 6, 3, "Để tạo các cột cho ListView, ta sử dụng thuộc tính nào?",
-  ["Columns", "Rows", "Items", "SubItems"],
-  "Slide 10: Thuộc tính Columns để tạo các cột cho ListView."),
+S("q31", 6, 2, "DateTimePicker khác MonthCalendar thế nào?",
+  ["DateTimePicker hiển thị gọn một ô ngày, bấm mới hiện lịch; MonthCalendar luôn hiển thị lịch tháng", "DateTimePicker chỉ chọn giờ", "MonthCalendar chỉ chọn năm", "Hai control giống nhau"],
+  "Cả hai dùng để hiển thị và chọn ngày."),
 
-S("q41", 6, 3, "Đoạn code sau thực hiện việc gì?\n`ListViewItem lvi = new ListViewItem(\"1\");`\n`lvi.SubItems.Add(\"9999\");`\n`lvi.SubItems.Add(\"Blade\");`\n`listView1.Items.Add(lvi);`",
-  ["Thêm một dòng mới có 3 cột (1, 9999, Blade) vào ListView", "Xóa dòng đầu tiên của ListView", "Chỉnh sửa dòng đầu tiên của ListView", "Đếm số dòng trong ListView"],
-  "Slide 10: Đoạn code thêm dữ liệu vào ListView. `SubItems.Add` thêm dữ liệu cho các cột tiếp theo."),
+S("q32", 6, 2, "Muốn DateTimePicker hiển thị ngày theo định dạng riêng (ví dụ dd/MM/yyyy) thì làm gì?",
+  ["Đặt Format = Custom và khai báo chuỗi định dạng ở CustomFormat", "Đặt Value = dd/MM/yyyy", "Đặt Text = Custom", "Không thể tùy chỉnh"],
+  "Value là giá trị ngày trên control."),
 
-S("q42", 6, 3, "Đoạn code sau thực hiện việc gì?\n`listView1.Items.RemoveAt(2);`",
-  ["Xóa dòng có vị trí (index) là 2 trong ListView", "Xóa 2 dòng đầu tiên của ListView", "Xóa toàn bộ ListView", "Thêm dòng mới vào vị trí số 2"],
-  "Slide 10: RemoveAt(index) xóa phần tử tại vị trí index. Remove(lvi) xóa theo đối tượng."),
+// ================= LISTBOX - COMBOBOX - RICHTEXTBOX =================
+S("q33", 6, 1, "Control nào tạo danh sách cho người dùng chọn một hoặc nhiều phần tử, có sự kiện mặc định SelectedIndexChanged?",
+  ["ListBox", "ComboBox", "TextBox", "Label"],
+  "ComboBox không hỗ trợ chọn nhiều."),
 
-S("q43", 6, 2, "Control `DataGridView` có tính năng đặc biệt nào mà `ListView` không có (theo slide)?",
-  ["Có thể hiển thị dữ liệu trực tiếp từ kết nối cơ sở dữ liệu (DataSource)", "Hiển thị được hình ảnh trong ô", "Hỗ trợ sắp xếp theo cột", "Hỗ trợ chọn nhiều dòng"],
-  "Slide 10: Đặc điểm đặc biệt của DataGridView là có thể hiển thị dữ liệu từ kết nối database, hoặc từ List object."),
+S("q34", 6, 2, "Thuộc tính SelectionMode của ListBox dùng để làm gì?",
+  ["Quy định chọn một hay cho phép chọn nhiều phần tử", "Sắp xếp danh sách", "Đổi màu phần tử được chọn", "Ẩn danh sách"],
+  "Khi chọn nhiều, dùng SelectedItems / SelectedIndices."),
 
-S("q44", 6, 3, "Đoạn code sau thực hiện việc gì?\n`List<Product> products = new List<Product>();`\n`products.Add(new Product { Barcode = \"111-222\", Name = \"Coca\", Price = 25000 });`\n`dataGridView1.DataSource = products;`",
-  ["Gán danh sách sản phẩm (List) làm nguồn dữ liệu cho DataGridView để hiển thị lên bảng", "Xóa dữ liệu trong DataGridView", "Thêm một cột mới vào DataGridView", "Kết nối DataGridView tới SQL Server"],
-  "Slide 10: Đoạn code gán `DataSource = products` để hiển thị danh sách đối tượng lên DataGridView."),
+S("q35", 6, 1, "Thuộc tính nào trả về chỉ số phần tử đang được chọn trong ListBox?",
+  ["SelectedIndex", "SelectedItem", "Items.Count", "SelectedIndices"],
+  "SelectedItem trả về chính phần tử; SelectedIndices trả về tập chỉ số khi chọn nhiều."),
 
-S("q45", 6, 2, "Control `TreeView` được sử dụng để làm gì?",
-  ["Hiển thị dữ liệu dưới dạng cây thư mục phân cấp (cha - con)", "Hiển thị dữ liệu dạng bảng", "Hiển thị danh sách phẳng", "Hiển thị biểu đồ"],
-  "Slide 10: TreeView là control dùng để hiển thị dữ liệu dưới dạng cây thư mục, tính trực quan hóa dữ liệu rất cao."),
+S("q76", 6, 1, "Thuộc tính nào trả về số phần tử của ListBox?",
+  ["Items.Count", "Items.Length", "Count()", "SelectedItems"],
+  "Ví dụ listBox1.Items.Count."),
 
-S("q46", 6, 3, "Để thêm một Node gốc (Root Node) vào TreeView bằng code, ta viết như thế nào?",
-  ["`tvSample.Nodes.Add(rootNode);`", "`tvSample.Items.Add(rootNode);`", "`tvSample.Root.Add(rootNode);`", "`tvSample.Nodes.Insert(rootNode);`"],
-  "Slide 10: Để thêm node gốc, dùng `tvSample.Nodes.Add(rootNode)`. Các node con thêm vào `rootNode.Nodes.Add(childNode)`."),
+M("q36", 6, 2, "Những phương thức nào của `listBox1.Items` dùng để thêm phần tử?",
+  ["Add", "AddRange", "Insert", "RemoveAt"], 3,
+  "RemoveAt xóa theo vị trí; Remove xóa phần tử; Clear xóa tất cả; OfType lọc phần tử cùng kiểu."),
 
-S("q47", 6, 3, "Để lấy Node đang được chọn trong TreeView, ta dùng thuộc tính nào?",
-  ["SelectedNode", "SelectedItem", "SelectedIndex", "CurrentNode"],
-  "Slide 10: `TreeNode tNode = tvSample.SelectedNode;` dùng để lấy node đang chọn."),
+S("q77", 6, 2, "Phương thức `Items.OfType` của ListBox/ComboBox dùng để làm gì?",
+  ["Lọc ra các phần tử có cùng kiểu dữ liệu", "Đếm số phần tử", "Sắp xếp phần tử", "Xóa phần tử trùng"],
+  "Ví dụ lấy các phần tử kiểu string."),
 
-S("q48", 6, 3, "Để xóa một Node đang được chọn khỏi TreeView, ta viết lệnh như thế nào?",
-  ["`tvSample.Nodes.Remove(tvSample.SelectedNode);`", "`tvSample.Nodes.Clear();`", "`tvSample.Items.RemoveAt(index);`", "`tvSample.Nodes.Delete();`"],
-  "Slide 10: `TreeNode tNode = tvSample.SelectedNode; tvSample.Nodes.Remove(tNode);` để xóa node đang chọn."),
+S("q37", 6, 2, "Đoạn code trong sự kiện Load sau thêm gì vào ListBox?" + C(`listBox1.Items.Clear();
+for (int i = 0; i < 10; i++)
+    listBox1.Items.Add("Item " + i);`),
+  ["10 phần tử từ 'Item 0' đến 'Item 9'", "10 phần tử từ 'Item 1' đến 'Item 10'", "1 phần tử 'Item 10'", "9 phần tử"],
+  "Clear() xóa dữ liệu cũ trước khi thêm."),
 
-S("q49", 6, 2, "Control `Chart` trong Windows Forms dùng để làm gì?",
-  ["Vẽ và hiển thị các loại biểu đồ (cột, đường, tròn...)", "Hiển thị dữ liệu dạng lưới", "Hiển thị cây thư mục", "Hiển thị hình ảnh"],
-  "Slide 10: Chart dùng để vẽ biểu đồ. Ví dụ: `chart1.Series[0].ChartType = SeriesChartType.Bar;`"),
+S("q78", 6, 2, "Khi người dùng chọn 'Item 3' trong ListBox, sự kiện sau hiển thị gì trên lblMessage?" + C(`private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+{
+    lblMessage.Text = listBox1.Text + " was clicked!";
+}`),
+  ["Item 3 was clicked!", "3 was clicked!", "listBox1 was clicked!", " was clicked!"],
+  "listBox1.Text là văn bản của phần tử đang chọn."),
 
-S("q50", 6, 3, "Để thiết lập loại biểu đồ là dạng cột (Bar) trong control Chart, ta dùng thuộc tính nào?",
-  ["`ChartType`", "`SeriesType`", "`ChartStyle`", "`Type`"],
-  "Slide 10: `chart1.Series[0].ChartType = SeriesChartType.Bar;` thiết lập loại biểu đồ."),
+S("q79", 6, 1, "Cách nhập dữ liệu cho ListBox/ComboBox ngay lúc thiết kế (Design Time) là gì?",
+  ["Mở thuộc tính Items (Collection) trong cửa sổ Properties và nhập từng dòng", "Viết code trong sự kiện Load", "Kết nối CSDL", "Kéo thả file Excel vào control"],
+  "Ngoài ra có thể thêm bằng code lúc chạy (Run Time)."),
 
-S("q51", 6, 3, "Để hiển thị giá trị số liệu ngay trên đầu mỗi cột trong biểu đồ Chart, ta set thuộc tính nào bằng `true`?",
-  ["`IsValueShownAsLabel`", "`ShowValue`", "`DisplayValue`", "`LabelValue`"],
-  "Slide 10: `chart1.Series[0].IsValueShownAsLabel = true;` để hiển thị số liệu trên cột."),
+S("q38", 6, 2, "ComboBox khác ListBox ở điểm cơ bản nào?",
+  ["ComboBox hiển thị dạng danh sách thả xuống và không hỗ trợ chọn nhiều phần tử", "ComboBox chỉ chứa số", "ComboBox không có thuộc tính Items", "ComboBox không có SelectedIndex"],
+  "Tên ComboBox thường bắt đầu bằng cbo."),
 
-S("q52", 6, 3, "Để gán dữ liệu cho biểu đồ Chart với trục X là mảng `Quaters` và trục Y là mảng `Y`, ta dùng phương thức nào?",
-  ["`chart1.Series[0].Points.DataBindXY(Quaters, Y);`", "`chart1.Series[0].Data = (Quaters, Y);`", "`chart1.DataBind(Quaters, Y);`", "`chart1.Series[0].SetData(Quaters, Y);`"],
-  "Slide 10: `DataBindXY` là phương thức dùng để gán dữ liệu cho các điểm (Points) của Series trong Chart."),
+S("q39", 6, 2, "Control nào hiển thị văn bản có định dạng (đậm, nghiêng, nhiều màu, nhiều đoạn) trên Form?",
+  ["RichTextBox", "TextBox", "Label", "MaskedTextBox"],
+  "RichTextBox hỗ trợ định dạng phong phú."),
+
+// ================= LISTVIEW - DATAGRIDVIEW - TREEVIEW =================
+S("q40", 6, 1, "Control ListView dùng để làm gì?",
+  ["Hiển thị dữ liệu dạng lưới (dòng, cột), có thể nhóm dữ liệu", "Nhập mật khẩu", "Hiển thị một ảnh", "Chọn ngày"],
+  "Các nội dung: tạo, thuộc tính, sự kiện, thêm, xóa, sửa, nhóm dữ liệu."),
+
+S("q41", 6, 2, "Thuộc tính nào dùng để tạo các cột cho ListView?",
+  ["Columns", "Items", "Rows", "Headers"],
+  "Mỗi cột là một ColumnHeader. Để thấy cột cần đặt View = Details."),
+
+S("q42", 6, 2, "Đoạn code sau làm gì?" + C(`ListViewItem lvi = new ListViewItem((listView1.Items.Count + 1) + "");
+lvi.SubItems.Add("9999");
+lvi.SubItems.Add("Blade");
+listView1.Items.Add(lvi);`),
+  ["Thêm một dòng mới: cột đầu là số thứ tự, các cột tiếp theo là 9999 và Blade", "Xóa dòng có mã 9999", "Sửa dòng thứ 9999", "Tạo 3 cột mới"],
+  "Cột đầu là Text của ListViewItem; các cột sau là SubItems."),
+
+S("q43", 6, 2, "Lệnh `listView1.Items.RemoveAt(2);` làm gì?",
+  ["Xóa dòng tại vị trí index 2 (dòng thứ ba)", "Xóa 2 dòng đầu", "Xóa cột thứ 2", "Xóa dòng có mã '2'"],
+  "Items.Remove(lviDelete) xóa theo đối tượng."),
+
+S("q80", 6, 2, "Trong sự kiện SelectedIndexChanged của ListView, lệnh nào lấy dòng đang được chọn?",
+  ["ListViewItem lvi = listView1.SelectedItems[0];", "ListViewItem lvi = listView1.SelectedIndex;", "ListViewItem lvi = listView1.Text;", "ListViewItem lvi = listView1.Items.Selected;"],
+  "SelectedItems là tập dòng được chọn; [0] là dòng đầu tiên."),
+
+S("q81", 6, 2, "Trong sự kiện ColumnClick của ListView, `e.Column == 0` cho biết điều gì?",
+  ["Người dùng vừa click vào tiêu đề cột đầu tiên", "Không có cột nào", "Dòng đầu được chọn", "ListView rỗng"],
+  "Thường dùng để sắp xếp theo cột được click."),
+
+S("q44", 6, 2, "Điểm đặc biệt của DataGridView so với ListView là gì?",
+  ["Có thể hiển thị bảng từ kết nối CSDL hoặc từ List đối tượng bằng thuộc tính DataSource", "Chỉ hiển thị được 1 cột", "Không có dòng", "Không hiển thị được số"],
+  "DataGridView cũng hiển thị dữ liệu theo dòng và cột."),
+
+S("q45", 6, 2, "Đoạn code sau hiển thị gì?" + C(`List<Product> products = new List<Product>();
+products.Add(new Product { Barcode = "111-222", Name = "Coca", Price = 25000 });
+products.Add(new Product { Barcode = "111-333", Name = "Pepsi", Price = 24000 });
+dataGridView1.DataSource = products;`),
+  ["DataGridView hiển thị 2 dòng với các cột Barcode, Name, Price", "Không hiển thị gì vì thiếu Columns", "Chỉ hiển thị cột Name", "Lỗi vì List không gán được cho DataSource"],
+  "Các cột được tạo tự động từ thuộc tính public của lớp Product."),
+
+S("q82", 6, 2, "Lớp Product dùng cho DataGridView khai báo như sau. Cú pháp `{ get; set; }` là gì?" + C(`public class Product
+{
+    public string Barcode { get; set; }
+    public string Name { get; set; }
+    public double Price { get; set; }
+}`),
+  ["Auto-implemented property cho phép đọc và gán giá trị thuộc tính", "Phương thức khởi tạo", "Sự kiện", "Biến tĩnh"],
+  "DataGridView đọc các property để tạo cột."),
+
+S("q46", 6, 1, "Control TreeView dùng để làm gì?",
+  ["Hiển thị dữ liệu dạng cây thư mục, trực quan hóa dữ liệu phân cấp", "Hiển thị biểu đồ", "Nhập văn bản dài", "Chọn ngày"],
+  "Ví dụ cây công ty: Công ty XYZ -> Phòng Nhân Sự -> nhân viên."),
+
+M("q83", 6, 2, "Những thuộc tính/thành phần nào thường dùng với TreeView?",
+  ["Nodes, TreeNode, SelectedNode", "ImageList, ImageIndex, SelectedImageIndex", "Expand, Collapse, Add, Remove", "PasswordChar, Multiline"], 3,
+  "PasswordChar, Multiline là của TextBox."),
+
+S("q47", 6, 3, "Đoạn code sau làm gì?" + C(`tvSample.Nodes.Clear();
+TreeNode rootNode = new TreeNode(txtRoot.Text);
+rootNode.ImageIndex = 0;
+rootNode.SelectedImageIndex = rootNode.ImageIndex;
+tvSample.Nodes.Add(rootNode);`),
+  ["Xóa các node cũ, tạo node gốc với tên lấy từ txtRoot, gán ảnh từ ImageList và thêm vào TreeView", "Xóa node đang chọn", "Mở rộng toàn bộ cây", "Đổi tên TreeView"],
+  "ImageIndex là ảnh lúc bình thường; SelectedImageIndex là ảnh khi được chọn."),
+
+S("q48", 6, 2, "Thuộc tính nào lấy node đang được chọn trong TreeView?",
+  ["SelectedNode", "SelectedItem", "CurrentNode", "FocusedNode"],
+  "TreeNode tNode = tvSample.SelectedNode;"),
+
+S("q49", 6, 2, "Lệnh nào xóa node đang được chọn khỏi TreeView?",
+  ["tvSample.Nodes.Remove(tvSample.SelectedNode);", "tvSample.SelectedNode.Clear();", "tvSample.Remove();", "tvSample.Nodes.Clear();"],
+  "Nodes.Clear() xóa toàn bộ cây."),
+
+S("q84", 6, 2, "Sự kiện nào của TreeView xảy ra sau khi người dùng chọn một node (tham số e.Node)?",
+  ["AfterSelect", "SelectedIndexChanged", "ColumnClick", "NodeClosed"],
+  "private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)."),
+
+S("q85", 6, 2, "Muốn TreeView hiển thị icon cho từng node, cần kết hợp với thành phần nào?",
+  ["ImageList", "PictureBox", "Panel", "RichTextBox"],
+  "Node chọn ảnh theo ImageIndex trong ImageList."),
+
+// ================= CHART =================
+S("q50", 6, 1, "Control Chart trong Windows Forms dùng để làm gì?",
+  ["Vẽ biểu đồ trực quan hóa dữ liệu (cột, đường, tròn...)", "Hiển thị bảng dữ liệu", "Nhập dữ liệu", "Hiển thị cây thư mục"],
+  "Dữ liệu được gắn vào các Series của Chart."),
+
+S("q51", 6, 2, "Để biểu đồ trong Chart là dạng thanh (Bar), ta dùng lệnh nào?",
+  ["chart1.Series[0].ChartType = SeriesChartType.Bar;", "chart1.Type = Bar;", "chart1.ChartAreas[0].Style = Bar;", "chart1.Series[0].Kind = \"Bar\";"],
+  "SeriesChartType còn có Column, Line, Pie..."),
+
+S("q52", 6, 2, "Để hiển thị giá trị số ngay trên mỗi cột/thanh của Chart, đặt thuộc tính nào bằng true?",
+  ["chart1.Series[0].IsValueShownAsLabel", "chart1.Series[0].ShowValue", "chart1.Legends[0].Enabled", "chart1.Series[0].IsVisibleInLegend"],
+  "LegendText đặt chữ cho chú thích."),
+
+S("q53", 6, 2, "Có mảng `Quaters` (tên các quý) và mảng `Y` (doanh số). Lệnh nào gán dữ liệu cho Series của Chart?",
+  ["chart1.Series[0].Points.DataBindXY(Quaters, Y);", "chart1.DataSource = Quaters;", "chart1.Series[0].Add(Quaters, Y);", "chart1.Points.Bind(Y, Quaters);"],
+  "DataBindXY nhận mảng giá trị trục X và trục Y."),
+
+S("q86", 6, 1, "Lệnh `chart1.Series[0].LegendText = \"Legend here\";` có tác dụng gì?",
+  ["Đặt nội dung chú thích (legend) cho Series", "Đặt tiêu đề biểu đồ", "Đặt nhãn trục X", "Đổi màu Series"],
+  "Legend giúp người xem biết Series biểu diễn gì."),
 ];
 module.exports = QUESTIONS_C6;
